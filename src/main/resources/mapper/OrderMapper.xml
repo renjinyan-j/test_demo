@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.finalproject.demos.mapper.OrderMapper">
+    <resultMap id="BaseResultMap" type="org.example.finalproject.demos.pojo.Order">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="seller_id" property="sellerId"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="status" property="status"/>
+        <result column="payment_status" property="paymentStatus"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="payment_time" property="paymentTime"/>
+        <result column="delivery_address" property="deliveryAddress"/>
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="complete_time" property="completeTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="org.example.finalproject.demos.pojo.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO orders (
+            order_no, user_id, seller_id, total_amount, status, payment_status,
+            payment_method, payment_time, delivery_address, contact_name, contact_phone,
+            remark, create_time, update_time, complete_time
+        ) VALUES (
+            #{orderNo}, #{userId}, #{sellerId}, #{totalAmount}, #{status}, #{paymentStatus},
+            #{paymentMethod}, #{paymentTime}, #{deliveryAddress}, #{contactName}, #{contactPhone},
+            #{remark}, #{createTime}, #{updateTime}, #{completeTime}
+        )
+    </insert>
+
+    <select id="selectById" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" parameterType="string" resultMap="BaseResultMap">
+        SELECT * FROM orders WHERE order_no = #{orderNo}
+    </select>
+
+    <select id="selectByUserIdAndStatus" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE user_id = #{userId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByUserId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectCompletedOrdersWithoutReview" parameterType="int" resultMap="BaseResultMap">
+        SELECT o.* FROM orders o
+        LEFT JOIN reviews r ON o.id = r.order_id
+        WHERE o.user_id = #{userId}
+        AND o.status = 2
+        AND r.id IS NULL
+        ORDER BY o.complete_time DESC
+    </select>
+
+    <select id="selectBySellerId" parameterType="int" resultMap="BaseResultMap">
+        SELECT * FROM orders
+        WHERE seller_id = #{sellerId}
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="updateById" parameterType="org.example.finalproject.demos.pojo.Order">
+        UPDATE orders
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="paymentStatus != null">payment_status = #{paymentStatus},</if>
+            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+            <if test="paymentTime != null">payment_time = #{paymentTime},</if>
+            <if test="completeTime != null">complete_time = #{completeTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePaySuccess">
+        UPDATE orders
+        SET status = 1,
+            payment_status = 1,
+            payment_method = #{paymentMethod},
+            payment_time = #{paymentTime},
+            update_time = #{updateTime}
+        WHERE order_no = #{orderNo}
+    </update>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM orders ORDER BY create_time DESC
+    </select>
+</mapper>

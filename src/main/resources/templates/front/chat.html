@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>即时沟通</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link th:href="@{/css/chat.css}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<div class="chat-shell">
+    <div class="card chat-card">
+        <div class="chat-header">
+            <div>
+                <span class="status-dot"></span>
+                <span class="peer">与用户 <span th:text="${peerUserId}">-</span> 对话</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-sm btn-light" th:href="@{/ershouproducts}"><i class="fas fa-arrow-left me-1"></i>返回</a>
+            </div>
+        </div>
+        <div id="chatBody" class="chat-body">
+            <div id="emptyHint" class="empty-hint">暂无消息，开始沟通吧~</div>
+        </div>
+        <div class="chat-footer">
+            <textarea id="messageInput" class="form-control" placeholder="按 Enter 发送，Shift+Enter 换行" maxlength="500"></textarea>
+            <button class="btn btn-primary btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane me-1"></i>发送</button>
+        </div>
+    </div>
+</div>
+
+<!--用于实现聊天页面的核心功能-->
+<script th:inline="javascript">
+<!--    从Thymeleaf模板引擎中获取后端传递的参数（会话ID、当前用户ID、对方用户ID），并声明一个全局变量stompClient用于管理WebSocket连接-->
+    const cid = /*[[${cid}]]*/ 0;
+    const currentUserId = /*[[${currentUserId}]]*/ 0;
+    const peerUserId = /*[[${peerUserId}]]*/ 0;
+    let stompClient = null;
+    //  时间格式化函数
+    // 将时间戳转换为“MM-DD HH:mm”格式的字符串
+    function formatTime(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${d.getMonth()+1}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    // 添加消息到页面
+    // 将单条消息渲染成HTML结构并插入到聊天区域中
+    function appendMessage(msg) {
+        const body = document.getElementById('chatBody');
+        const empty = document.getElementById('emptyHint');
+        // 移除“暂无消息”提示
+        if (empty) empty.remove();
+
+        const item = document.createElement('div');
+        const isMe = msg.fromUserId === currentUserId;
+        item.className = 'msg' + (isMe ? ' me' : '');
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = msg.content;
+
+        const meta = document.createElement('div');
+        meta.className = 'meta' + (isMe ? ' me' : '');
+        meta.textContent = (isMe ? '我' : '对方') + ' · ' + formatTime(msg.sentAt);
+
+        item.appendChild(bubble);
+        item.appendChild(meta);
+        body.appendChild(item);
+        body.scrollTop = body.scrollHeight;
+    }
+
+    // 加载历史消息
+    // 从后端拉取历史消息并渲染到页面
+    function loadHistory() {
+        // 拉取历史消息，首次渲染后清除未读
+        fetch(`/api/chat/conversation/${cid}/messages?offset=0&limit=100`)
+            .then(r => r.json())
+            .then(list => {
+                const body = document.getElementById('chatBody');
+                body.innerHTML = '<div id="emptyHint" class="empty-hint">暂无消息，开始沟通吧~</div>';
+                list.forEach(appendMessage);
+                // 加载完成后调用markRead()标记所有消息为已读
+                markRead();
+            });
+    }
+    //标记消息为已读
+    // 向服务器发送POST请求，告知指定会话中的所有消息已被当前用户阅读。
+    function markRead() {
+        fetch(`/api/chat/conversation/${cid}/read`, {method: 'POST'});
+    }
+    // 建立WebSocket连接
+    // 使用SockJS和STOMP协议建立WebSocket连接，并订阅当前会话的消息通道
+    function connectWs() {
+        // 建立 STOMP 连接并订阅当前会话通道
+        const socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function () {
+            stompClient.subscribe(`/topic/chat.${cid}`, function (frame) {
+                const msg = JSON.parse(frame.body);
+                // 当收到新消息时，调用appendMessage()将其显示在界面上
+                appendMessage(msg);
+                // 如果该消息是发给当前用户的，则再次调用markRead()更新未读状态
+                if (msg.toUserId === currentUserId) {
+                    markRead();
+                }
+            });
+        });
+    }
+    // 发送消息
+    // 获取输入框内容并通过WebSocket发送出去
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const content = input.value.trim();
+        if (!content) return;
+        if (!stompClient || !stompClient.connected) {
+            // 避免在未连上 WS 时发送导致丢失
+            alert('连接中，请稍后再试');
+            return;
+        }
+        stompClient.send("/app/chat.send", {}, JSON.stringify({conversationId: cid, content: content}));
+        input.value = '';
+        input.focus();
+    }
+    //  页面初始化与事件绑定
+    // Enter 发送，Shift+Enter 换行
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('messageInput');
+        input.addEventListener('keydown', function (e) {
+            // 绑定回车键发送消息的功能（Shift+Enter换行）
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        loadHistory();
+        connectWs();
+    });
+</script>
+</body>
+</html>
+
+

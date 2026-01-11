@@ -1,0 +1,23 @@
+1. **收集与确认信息**  
+   - 快速浏览项目关键代码与配置：`pom.xml`、`application.properties`、控制层（如 `ProductsController`、`SellerController`、`OrderPayController`、`AlipayController`、`ChatWsController`）、安全配置 `SecurityConfiguration`，以及主要 Mapper XML（`ProductsMapper.xml`、`OrderMapper.xml`、`UserMapper.xml`、`ReviewMapper.xml`、`CartMapper.xml` 等），提炼功能点与数据表字段。  
+   - 了解已有测试情况（`src/test/java/.../FinalProjectApplicationTests.java`）用于测试章节说明。
+
+2. **输出报告正文草稿（按目录填充）**  
+   - 项目背景：校园二手交易痛点、目标、用户角色（买家/卖家/管理员）。  
+   - 相关技术：Spring Boot 2.7.6、Spring Security、Thymeleaf、MyBatis+PageHelper、MySQL+Druid、WebSocket/STOMP、Lombok、邮件、支付宝沙箱。  
+   - 需求分析：功能需求（商品浏览/搜索/分类/详情、购物车、下单/支付、订单流转、评价、聊天、注册登录与角色、卖家管理、后台管理等）、非功能（性能、安全、易用、可维护、兼容）、可行性（技术/经济/操作性）。  
+   - 总体设计：分层架构描述（前端模板层、Controller、Service、Mapper、Security、WebSocket、支付集成）、关键流程概览；数据库概要（核心表及关系）。  
+   - 详细设计与实现：逐模块文字化描述（注册登录与角色、商品与分类、购物车、订单与支付、评价、聊天、卖家商品管理、后台统计/审核、安全控制）。  
+   - 测试：现有自动化空缺说明，补充手工测试要点（功能、支付回调、权限、聊天、异常与边界、兼容与性能简述）。  
+   - 总结：成果、价值、改进方向（多卖家拆单、更多支付方式、文件存储/CDN、监控告警、自动化测试等）。
+
+3. **交付与迭代**  
+   - 以中文文字形式交付，可直接粘贴到《12.课程设计报告.docx》对应章节。  
+   - 如需调整重点或补充截图/示意图，再根据反馈迭代内容。
+
+
+
+
+
+
+

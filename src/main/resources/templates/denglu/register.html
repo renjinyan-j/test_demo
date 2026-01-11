@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <myHead th:replace="denglu/layout :: head('用户注册')"></myHead>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{login/js/jquery.min.js}"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
+</head>
+<body style="background-image: url('/login/img/log.webp'); background-size: cover; background-position: center;">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center bg-primary text-white">
+                    <h3>用户注册</h3>
+                </div>
+                <div class="card-body">
+                    <!-- 消息提示 -->
+                    <div th:if="${msg}" class="alert alert-success text-center">
+                        <span th:text="${msg}"></span>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger text-center">
+                        <span th:text="${error}"></span>
+                    </div>
+
+                    <!-- 注册表单 -->
+                    <form th:action="@{/doRegister}" method="post" th:object="${user}">
+                        <!-- 用户名 -->
+                        <div class="mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" th:field="*{username}" class="form-control" placeholder="请输入用户名" required>
+                        </div>
+
+                        <!-- 密码 -->
+                        <div class="mb-3">
+                            <label class="form-label">密码</label>
+                            <input type="password" th:field="*{password}" class="form-control" placeholder="请输入密码" required>
+                        </div>
+
+                        <!-- 邮箱 -->
+                        <div class="mb-3">
+                            <label class="form-label">邮箱</label>
+                            <input type="email" th:field="*{email}" class="form-control" placeholder="请输入邮箱" required>
+                        </div>
+
+                        <!-- 注册类型选择 -->
+                        <div class="mb-3">
+                            <label class="form-label">注册类型 <span class="text-danger">*</span></label>
+                            <div class="mt-2">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="roleCode" id="roleBuyer" 
+                                           value="ROLE_BUYER" th:checked="${availableRoles != null and availableRoles.size() > 0}" required>
+                                    <label class="form-check-label" for="roleBuyer">
+                                        <strong>买家</strong>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="roleCode" id="roleSeller" 
+                                           value="ROLE_SELLER" required>
+                                    <label class="form-check-label" for="roleSeller">
+                                        <strong>卖家</strong>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> 请选择您的注册类型。买家可以浏览和购买商品，卖家可以发布和管理商品。
+                            </small>
+                        </div>
+
+                        <!-- 验证码 -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input type="text" name="verifyCode" class="form-control" placeholder="请输入验证码" required>
+                                <button type="button" id="sendCodeBtn" class="btn btn-outline-secondary">获取验证码</button>
+                            </div>
+                        </div>
+
+                        <!-- 提交 -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">注册</button>
+                            <a th:href="@{/toLoginPage}" class="btn btn-link text-center">已有账号？登录</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 获取CSRF令牌和头信息（从元标签中）
+    const csrfToken = $("meta[name='_csrf']").attr("content");
+    const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+    // 全局配置Ajax，自动携带CSRF令牌（所有POST请求生效）
+    $(document).ajaxSend(function(event, xhr, options) {
+        xhr.setRequestHeader(csrfHeader, csrfToken);
+    });
+    // 验证码发送逻辑
+    $(function() {
+        let countdown = 60;
+        let isSending = false;
+
+        $("#sendCodeBtn").click(function() {
+            const email = $("input[name='email']").val();
+            if (!email) {
+                alert("请输入邮箱");
+                return;
+            }
+            if (isSending) return;
+
+            isSending = true;
+            $(this).prop("disabled", true).text("发送中...");
+
+            $.post("/sendCode", { email: email }, function(result) {
+                if (result === "success") {
+                    alert("验证码已发送");
+                    let timer = setInterval(function() {
+                        countdown--;
+                        $("#sendCodeBtn").text(countdown + "秒后重发");
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            $("#sendCodeBtn").prop("disabled", false).text("获取验证码");
+                            countdown = 60;
+                            isSending = false;
+                        }
+                    }, 1000);
+                } else {
+                    alert(result);
+                    $("#sendCodeBtn").prop("disabled", false).text("获取验证码");
+                    isSending = false;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

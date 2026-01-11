@@ -1,0 +1,82 @@
+<!--通过调用 /api/chat/conversations/mine 来 加载当前用户参与的所有会话-->
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>消息中心</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <style>
+        body { background: #f4f6f8; }
+        .container { margin-top: 30px; }
+        .card { box-shadow: 0 5px 18px rgba(0,0,0,0.08); border: none; }
+        .unread { color: #d9534f; font-weight: 700; }
+    </style>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="seller/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="seller/layout :: sidebar('order')"></div>
+
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>会话ID</th>
+                    <th>商品ID</th>
+                    <th>买家ID</th>
+                    <th>最后消息</th>
+                    <th>未读</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="convBody">
+                <tr><td colspan="6" class="text-center">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function renderList(list) {
+        const body = document.getElementById('convBody');
+        body.innerHTML = '';
+        if (!list || list.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暂无会话</td></tr>';
+            return;
+        }
+        list.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${c.id}</td>
+                <td>${c.goodsId || ''}</td>
+                <td>${c.buyerId || ''}</td>
+                <td>${c.lastMessage ? c.lastMessage : ''}</td>
+                <td class="${(c.unreadForSeller||0)>0 ? 'unread' : ''}">${c.unreadForSeller || 0}</td>
+                <td><a class="btn btn-sm btn-primary" href="/front/chat?cid=${c.id}">进入会话</a></td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    function loadData() {
+        fetch('/api/chat/conversations/mine')
+            .then(r => {
+                if (r.status === 401) { window.location.href = '/toLoginPage'; return null; }
+                return r.json();
+            })
+            .then(data => data && renderList(data))
+            .catch(e => {
+                document.getElementById('convBody').innerHTML =
+                    `<tr><td colspan="6" class="text-danger text-center">加载失败: ${e}</td></tr>`;
+            });
+    }
+
+    loadData();
+</script>
+</body>
+</html>

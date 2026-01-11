@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>二手商品</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+    <style>
+        li {
+            list-style-type: none;
+
+        }
+        .text-black {
+            text-decoration: none;
+            background-color: #ede2e2;
+            width: 140px;
+            height: 40px;
+            display: inline-block;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 40px;
+            border-color: #ede2e2
+
+
+        }
+        body {
+            background: #F4E9E8;
+        }
+        .col-md-3 {
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <div th:replace="basic/layout :: topNav('ershou')"></div>
+<!--    method为请求方式，get为获取请求，post为提交请求-->
+<!--    action设置访问路径-->
+    <form action="/searchProducts" method="get">
+        <div class="row">
+            <div class="col-md-3" >
+                <label for="name">商品名称</label>
+                <div>
+                    <input type="text" id="name" name="name" placeholder="请输入商品名称">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="minAmount">最小值</label>
+                <div>
+                    <input type="number" id="minAmount" name="minAmount">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="maxAmount">最大值</label>
+                <div>
+                    <input type="number" id="maxAmount" name="maxAmount">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn" style="background-color:  #ede2e2;border-color: #ede2e2; font-size: 20px;color: gray;">查询</button>
+            </div>
+        </div>
+    </form>
+    <div class="row" style="width: 100%">
+        <div class="col-2" style="font-size: 22px; ">
+            <ul>
+                <li>
+                    <a th:href="@{'/ershouproducts'}" class="text-black" style="border-color: #ede2e2">全部商品</a>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <button type="button" class="text-black" th:onclick="productsCategory(1)">服装</button>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <button type="button" class="text-black" th:onclick="productsCategory(2)">鞋类</button>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <button type="button" class="text-black" th:onclick="productsCategory(3)">数码</button>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <button type="button" class="text-black" th:onclick="productsCategory(4)">书籍</button>
+                </li>
+            </ul>
+        </div>
+        <div class="col-10">
+            <div class="row">
+                <div class="col-lg-4 col-md-5 mb-2" th:each="product : ${pageInfo.list}">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            <div class="col-md-5">
+                                <img th:src="${product.images[0].url}" class="img-fluid rounded-start img-thumbnail" alt="商品图片">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold" th:text="${product.title}">商品标题</h5>
+                                    <p class="card-text text-truncate" th:text="${product.description}">商品描述</p>
+                                    <p class="card-text" th:text="'￥' + ${product.price}" style="color:red;float: left;font-size: 20px" >价格</p>
+                                    <a type="button" class="btn btn-outline-primary btn-sm" style="float: right" th:href="@{/productDetail(id=${product.id})}">商品详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 分页控件 -->
+        <nav th:if="${pageInfo.pages > 1}">
+            <ul class="pagination justify-content-center">
+                <!-- 上一页 -->
+                <li class="page-item" th:classappend="${pageInfo.hasPreviousPage} ? '' : 'disabled'">
+                    <a class="page-link"
+                       th:href="@{ '/searchProducts'(
+                                   pageNum=${pageInfo.prePage},
+                                   pageSize=${pageInfo.pageSize})}"
+                       th:unless="${!pageInfo.hasPreviousPage}">上一页</a>
+                    <span class="page-link" th:if="${!pageInfo.hasPreviousPage}">上一页</span>
+                </li>
+
+                <!-- 页码 -->
+                <li class="page-item" th:each="num : ${#numbers.sequence(1, pageInfo.pages)}"
+                    th:classappend="${num == pageInfo.pageNum} ? 'active' : ''">
+                    <a class="page-link"
+                       th:href="@{'/searchProducts'(
+                                   pageNum=${num},
+                                   pageSize=${pageInfo.pageSize})}"
+                       th:text="${num}">1</a>
+                </li>
+
+                <!-- 下一页 -->
+                <li class="page-item" th:classappend="${pageInfo.hasNextPage} ? '' : 'disabled'">
+                    <a class="page-link"
+                       th:href="@{'/searchProducts'(
+                                   pageNum=${pageInfo.nextPage},
+                                   pageSize=${pageInfo.pageSize})}"
+                       th:unless="${!pageInfo.hasNextPage}">下一页</a>
+                    <span class="page-link" th:if="${!pageInfo.hasNextPage}">下一页</span>
+                </li>
+            </ul>
+
+            <!-- 分页信息 -->
+            <div class="text-center mt-2 text-muted">
+                显示第 <span th:text="${pageInfo.startRow}">1</span>-<span th:text="${pageInfo.endRow}">10</span> 条，
+                共 <span th:text="${pageInfo.total}">0</span> 条记录，
+                共 <span th:text="${pageInfo.pages}">0</span> 页
+            </div>
+        </nav>
+    </div>
+</div>
+</body>
+<script>
+    function productsCategory(categoryId) {
+        // 浏览器直接访问Get请求
+        window.location.href = "/productsCategory?categoryId=" + categoryId;
+    }
+</script>
+</html>

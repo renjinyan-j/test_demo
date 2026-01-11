@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 校园便利平台</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="admin/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="admin/layout :: sidebar('profile')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">系统首页</a></li>
+            <li class="breadcrumb-item active">个人中心</li>
+        </ol>
+    </nav>
+
+    <!-- 个人信息卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">个人信息</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>用户名：</strong><span sec:authentication="name">admin</span></p>
+                    <p><strong>角色：</strong>管理员</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="admin/layout :: sidebarScript"></div>
+</body>
+</html>
+

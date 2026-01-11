@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user.id == null ? '新增用户' : '编辑用户'}">用户表单 - 校园便利平台</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="admin/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="admin/layout :: sidebar('user')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">系统首页</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/users}">用户管理</a></li>
+            <li class="breadcrumb-item active" th:text="${user.id == null ? '新增用户' : '编辑用户'}">用户表单</li>
+        </ol>
+    </nav>
+
+    <!-- 用户表单 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0" th:text="${user.id == null ? '新增用户' : '编辑用户'}">用户表单</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/users/save}" method="post" th:object="${user}">
+                <input type="hidden" th:field="*{id}"/>
+
+                <div class="mb-3">
+                    <label class="form-label">用户名</label>
+                    <input th:field="*{username}" th:readonly="${user.id != null}"
+                           class="form-control" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">昵称</label>
+                    <input th:field="*{nickname}" class="form-control"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">邮箱</label>
+                    <input th:field="*{email}" class="form-control" type="email"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">手机号</label>
+                    <input th:field="*{phone}" class="form-control"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">状态</label>
+                    <select th:field="*{status}" class="form-select">
+                        <option value="1">正常</option>
+                        <option value="0">禁用</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">角色选择：</label>
+                    <div th:each="r : ${allRoles}" class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               th:checked="${userRoleIds != null and userRoleIds.contains(r.id)}"
+                               th:value="${r.id}" name="roleIds"
+                               th:id="'role_' + ${r.id}"/>
+                        <label class="form-check-label" th:for="'role_' + ${r.id}"
+                               th:text="${r.roleName}"></label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <a th:href="@{/users}" class="btn btn-secondary ms-2">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="admin/layout :: sidebarScript"></div>
+</body>
+</html>

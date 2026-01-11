@@ -1,0 +1,114 @@
+<!--通过调用 /api/chat/conversations/mine 来 加载当前用户参与的所有会话-->
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <title>消息中心</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f4f6f8; }
+        .card { box-shadow: 0 5px 18px rgba(0,0,0,0.08); border: none; }
+        .unread { color: #d9534f; font-weight: 700; }
+    </style>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="buyer/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="buyer/layout :: sidebar('chat')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px);">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/buyer/xitongshouye}" class="text-decoration-none">买家中心</a></li>
+            <li class="breadcrumb-item active">消息中心</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">消息中心</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>会话ID</th>
+                    <th>商品ID</th>
+                    <th>卖家ID</th>
+                    <th>最后消息</th>
+                    <th>未读</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="convBody">
+                <tr><td colspan="6" class="text-center">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="buyer/layout :: sidebarScript"></div>
+<!--    在网页上渲染用户的聊天会话列表，并处理数据加载和错误展示-->
+<script>
+<!--将传入的会话列表 (list) 渲染成HTML表格行，并插入到页面中ID为 convBody 的元素里-->
+    function renderList(list) {
+        // 获取页面上的 tbody 元素（ID为 convBody）
+        const body = document.getElementById('convBody');
+        // 清空该区域的内容
+        body.innerHTML = '';
+        // 如果没有数据或数组为空，显示“暂无会话”的提示信息
+        if (!list || list.length === 0) {
+            body.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暂无会话</td></tr>';
+            return;
+        }
+        // 遍历每个会话对象 c，生成一行表格内容
+        list.forEach(c => {
+            const tr = document.createElement('tr');
+            // 显示会话ID、商品ID、卖家ID、最后一条消息内容
+            tr.innerHTML = `
+<!--显示会话ID、商品ID、卖家ID、最后一条消息内容-->
+                <td>${c.id}</td>
+                <td>${c.goodsId || ''}</td>
+                <td>${c.sellerId || ''}</td>
+                <td>${c.lastMessage ? c.lastMessage : ''}</td>
+<!--                显示买家未读消息数-->
+                <td class="${(c.unreadForBuyer||0)>0 ? 'unread' : ''}">${c.unreadForBuyer || 0}</td>
+<!--                提供一个链接按钮，点击后跳转到具体会话页面（带参数 cid=会话ID）-->
+                <td><a class="btn btn-sm btn-primary" href="/front/chat?cid=${c.id}">进入会话</a></td>
+            `;
+            body.appendChild(tr);
+        });
+    }
+
+    // 通过AJAX请求从服务器获取当前用户的所有会话列表，并调用 renderList 方法进行渲染
+    function loadData() {
+        //
+        // 使用 fetch API 向后端接口 /api/chat/conversations/mine 发起GET请求
+        // fetch 现代浏览器提供的一个用于发起网络请求的 JavaScript API。
+        fetch('/api/chat/conversations/mine')
+            // 处理响应结果
+            // 如果状态码是401（未授权），则重定向到登录页
+            // 否则解析JSON格式的数据
+            .then(r => {
+                if (r.status === 401) { window.location.href = '/toLoginPage'; return null; }
+                return r.json();
+            })
+            // 成功获取数据后，调用 renderList(data) 渲染列表
+            .then(data => data && renderList(data))
+            .catch(e => {
+                document.getElementById('convBody').innerHTML =
+                    `<tr><td colspan="6" class="text-danger text-center">加载失败: ${e}</td></tr>`;
+            });
+    }
+    loadData();
+</script>
+</body>
+</html>
+

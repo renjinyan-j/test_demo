@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卖家首页 - 校园便利平台</title>
+  <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="seller/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="seller/layout :: sidebar('dashboard')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+  <!-- 面包屑导航 -->
+  <nav class="bg-light p-3 mb-3 rounded">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item">
+        <a th:href="@{/seller/dashboard}" class="text-decoration-none">系统首页</a>
+      </li>
+      <li class="breadcrumb-item active">卖家中心</li>
+    </ol>
+  </nav>
+
+  <!-- 统计卡片 -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">我的商品</h5>
+          <h2 class="text-primary" th:text="${productCount}">0</h2>
+          <a th:href="@{/seller/product/list}" class="btn btn-primary btn-sm">查看详情</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">待处理订单</h5>
+          <h2 class="text-warning">0</h2>
+          <a th:href="@{/seller/order/list}" class="btn btn-warning btn-sm">查看详情</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">快速操作</h5>
+          <a th:href="@{/seller/product/add}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus"></i> 上传商品
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 欢迎内容 -->
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title">欢迎使用卖家中心</h4>
+      <p class="card-text">在这里您可以管理您的商品、查看订单信息等。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="seller/layout :: sidebarScript"></div>
+</body>
+</html>

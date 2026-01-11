@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="org.example.finalproject.demos.mapper.CartMapper">
+    <!-- 结果映射 -->
+    <resultMap id="CartResultMap" type="org.example.finalproject.demos.pojo.Cart">
+        <id property="cartId" column="cart_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="price" column="price"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="quantity" column="quantity"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 根据用户ID和商品ID查询购物车项 -->
+    <select id="selectByUserIdAndProductId" resultMap="CartResultMap">
+        SELECT
+            cart_id,
+            user_id,
+            product_id,
+            product_name,
+            price,
+            image_url,
+            quantity,
+            created_at,
+            updated_at
+        FROM cart
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </select>
+
+    <!-- 插入新的购物车项 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="cartId">
+        INSERT INTO cart (
+            user_id,
+            product_id,
+            product_name,
+            price,
+            image_url,
+            quantity,
+            created_at,
+            updated_at
+        ) VALUES (
+                     #{userId},
+                     #{productId},
+                     #{productName},
+                     #{price},
+                     #{imageUrl},
+                     #{quantity},
+                     #{createdAt},
+                     #{updatedAt}
+                 )
+    </insert>
+
+    <!-- 更新购物车项数量 -->
+    <update id="updateQuantity">
+        UPDATE cart
+        SET quantity = #{quantity}, updated_at = #{updatedAt}
+        WHERE cart_id = #{cartId}
+    </update>
+
+    <!-- 根据用户ID和商品ID删除购物车项 -->
+    <delete id="deleteByUserIdAndProductId">
+        DELETE FROM cart
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+
+    <!-- 查询用户所有购物车项 -->
+    <select id="selectCartsByUserId" resultMap="CartResultMap">
+        SELECT
+            cart_id,
+            user_id,
+            product_id,
+            product_name,
+            price,
+            image_url,
+            quantity,
+            created_at,
+            updated_at
+        FROM cart
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+</mapper>

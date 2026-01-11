@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>导航栏</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+    <style>
+        li {
+            list-style-type: none;
+
+        }
+    </style>
+</head>
+<body>
+<div th:fragment="topNav(type)" style="background-color:white;height: 40px;border-radius: 10px">
+    <ul class="list-unstyled" style="float:left;">
+        <li th:if="${type} == 'ershou'">
+            <a th:href="@{'/front/homepage'}" style="font-size:20px;color: gray;line-height: 40px;text-decoration: none;">首页--二手商品</a>
+        </li>
+        <li th:if="${type} == 'guanli'">
+            <a th:href="@{'/ProductsFront'}" style="font-size:20px;color: gray;line-height: 40px;text-decoration: none;">首页--后台管理</a>
+        </li>
+        <li th:if="${type} == 'gouwuche'">
+            <a th:href="@{'/front/homepage'}" style="font-size:20px;color: gray;line-height: 40px;text-decoration: none;">首页--购物车</a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

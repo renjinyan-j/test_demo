@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/login/js/jquery.min.js}"></script>
+    <style>
+        body {
+            background:#F4E9E8;
+        }
+        /* 居中单元格内容 */
+        .table th,
+        .table td {
+
+            vertical-align: middle;
+        }
+        h5{
+            font-weight: bold;
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <div th:replace="basic/layout :: topNav('gouwuche')"></div>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">商品图片</th>
+            <th scope="col">商品名称</th>
+            <th scope="col">单价</th>
+            <th scope="col">数量</th>
+            <th scope="col">小计</th>
+            <th scope="col">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${cartItems}">
+            <td>
+                <img th:if="${item.imageUrl}" th:src="${item.imageUrl}" alt="商品图片" style="width: 80px; height: 80px; object-fit: cover;">
+                <div th:unless="${item.imageUrl}" style="width: 80px; height: 80px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    无图片
+                </div>
+            </td>
+            <td th:text="${item.productName}">商品名称</td>
+            <td th:text="'￥' + ${#numbers.formatDecimal(item.price, 1, 2)}">单价</td>
+            <td>
+                <div class="input-group" style="width: 120px;">
+                    <button class="btn btn-outline-secondary" type="button"
+                            th:onclick="'updateQuantity(' + ${item.productId} + ', ' + (${item.quantity} - 1) + ')'">-</button>
+                    <input type="text" class="form-control text-center" th:value="${item.quantity}" readonly>
+                    <button class="btn btn-outline-secondary" type="button"
+                            th:onclick="'updateQuantity(' + ${item.productId} + ', ' + (${item.quantity} + 1) + ')'">+</button>
+                </div>
+            </td>
+            <td th:text="'￥' + ${#numbers.formatDecimal(item.totalPrice, 1, 2)}">小计</td>
+            <td>
+                <button class="btn btn-danger btn-sm"
+                        th:onclick="'removeFromCart(' + ${item.productId} + ')'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                    </svg>
+                    删除
+                </button>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(cartItems)}">
+            <td colspan="6" class="text-center">购物车为空</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${!#lists.isEmpty(cartItems)}" class="mt-3">
+        <div class="d-flex justify-content-end">
+            <h5>总计: <span th:text="'￥' + ${#numbers.formatDecimal(totalAmount, 1, 2)}">0.00</span></h5>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <a th:href="@{/ershouproducts}" class="btn btn-secondary me-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                继续购物
+            </a>
+            <form th:action="@{/order/checkoutCart}" method="post">
+                <button class="btn btn-warning" type="submit" style="color: white">去结算</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 更新购物车商品数量
+    function updateQuantity(productId, quantity) {
+        if (quantity <= 0) {
+            if (!confirm('确定要删除该商品吗？')) {
+                return;
+            }
+        }
+
+        $.ajax({
+            url: '/updateCart',
+            type: 'POST',
+            data: {
+                productId: productId,
+                quantity: quantity
+            },
+            success: function(response) {
+                if (response === 'success') {
+                    // 刷新页面以显示最新数据
+                    location.reload();
+                } else {
+                    alert('操作失败，请重试！');
+                }
+            },
+            error: function() {
+                alert('网络错误，请重试！');
+            }
+        });
+    }
+
+    // 从购物车删除商品
+    function removeFromCart(productId) {
+        if (!confirm('确定要删除该商品吗？')) {
+            return;
+        }
+
+        $.ajax({
+            url: '/removeFromCart',
+            type: 'POST',
+            data: {
+                productId: productId
+            },
+            success: function(response) {
+                if (response === 'success') {
+                    // 刷新页面以显示最新数据
+                    location.reload();
+                } else {
+                    alert('删除失败，请重试！');
+                }
+            },
+            error: function() {
+                alert('网络错误，请重试！');
+            }
+        });
+    }
+</script>
+</body>
+</html>

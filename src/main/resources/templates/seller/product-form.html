@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.id != null} ? '编辑商品' : '上传商品'">上传商品 - 校园便利平台</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script th:src="@{/login/js/jquery.min.js}"></script>
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="seller/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="seller/layout :: sidebar('product-add')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/seller/dashboard}">系统首页</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/seller/product/list}">商品管理</a></li>
+            <li class="breadcrumb-item active" th:text="${product.id != null} ? '编辑商品' : '上传商品'">上传商品</li>
+        </ol>
+    </nav>
+
+    <!-- 消息提示 -->
+    <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${msg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- 商品表单 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0" th:text="${product.id != null} ? '编辑商品' : '上传商品'">上传商品</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="${product.id != null} ? @{/seller/product/edit/{id}(id=${product.id})} : @{/seller/product/add}"
+                  method="post" enctype="multipart/form-data" th:object="${product}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <!-- 商品标题 -->
+                <div class="mb-3">
+                    <label class="form-label">商品标题 <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{title}" class="form-control" placeholder="请输入商品标题" required>
+                </div>
+
+                <!-- 价格 -->
+                <div class="mb-3">
+                    <label class="form-label">价格 <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" th:field="*{price}" class="form-control" placeholder="0.00" step="0.01" min="0" required>
+                        <span class="input-group-text">元</span>
+                    </div>
+                </div>
+
+                <!-- 尺寸 -->
+                <div class="mb-3">
+                    <label class="form-label">尺寸</label>
+                    <input type="text" th:field="*{size}" class="form-control" placeholder="例如：L、M、S 或 具体尺寸">
+                </div>
+
+                <!-- 分类 -->
+                <div class="mb-3">
+                    <label class="form-label">商品分类 <span class="text-danger">*</span></label>
+                    <select th:field="*{categoryId}" class="form-select" required>
+                        <option value="">请选择分类</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.id}"
+                                th:text="${category.name}">分类名称</option>
+                    </select>
+                </div>
+
+                <!-- 商品描述 -->
+                <div class="mb-3">
+                    <label class="form-label">商品描述 <span class="text-danger">*</span></label>
+                    <textarea th:field="*{description}" class="form-control" rows="5" placeholder="请输入商品详细描述" required></textarea>
+                </div>
+
+                <!-- 商品图片 -->
+                <div class="mb-3">
+                    <label class="form-label">商品图片 <span class="text-danger">*</span></label>
+                    <input type="file" name="images" class="form-control" multiple accept="image/*" required>
+                    <small class="form-text text-muted">可以上传多张图片，建议上传清晰的产品图片</small>
+                </div>
+
+                <!-- 提交按钮 -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a th:href="@{/seller/product/list}" class="btn btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-primary" th:text="${product.id != null} ? '更新商品' : '上传商品'">上传商品</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="seller/layout :: sidebarScript"></div>
+</body>
+</html>

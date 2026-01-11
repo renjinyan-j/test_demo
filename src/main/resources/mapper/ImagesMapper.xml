@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.finalproject.demos.mapper.ImagesMapper">
+
+  <select id="getImages" resultType="Images">
+    select * from images
+  </select>
+
+  <!-- 插入图片 -->
+  <insert id="insertImage" parameterType="org.example.finalproject.demos.pojo.Images">
+    INSERT INTO images (product_id, url)
+    VALUES (#{productId}, #{url})
+  </insert>
+
+  <!-- 根据商品ID删除图片 -->
+  <delete id="deleteImagesByProductId" parameterType="Integer">
+    DELETE FROM images WHERE product_id = #{productId}
+  </delete>
+
+</mapper>

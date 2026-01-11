@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员后台 - 系统首页</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="admin/layout :: header"></div>
+    <div th:replace="admin/layout :: sidebar('dashboard')"></div>
+    
+    <div class="main-content" style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+        <!-- 面包屑导航 -->
+        <nav class="bg-light p-3 mb-3 rounded">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">系统首页</a></li>
+                <li class="breadcrumb-item active">系统首页</li>
+            </ol>
+        </nav>
+        
+        <div class="text-center" style="padding: 100px 0;">
+            <h1 class="display-4 text-muted">欢迎使用 校园便利平台</h1>
+        </div>
+        
+        <div class="row g-3 mt-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">用户数量</h6>
+                        <h3 class="fw-bold" th:text="${userCount}">0</h3>
+                        <a class="btn btn-link p-0" th:href="@{/users}">管理用户</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">商品数量</h6>
+                        <h3 class="fw-bold" th:text="${productCount}">0</h3>
+                        <a class="btn btn-link p-0" th:href="@{/admin/products}">查看商品</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h6 class="text-muted">订单数量</h6>
+                        <h3 class="fw-bold" th:text="${orderCount}">0</h3>
+                        <a class="btn btn-link p-0" th:href="@{/admin/orders}">查看订单</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="admin/layout :: sidebarScript"></div>
+</body>
+</html>

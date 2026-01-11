@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--完成类的绑定-->
+<mapper namespace="org.example.finalproject.demos.mapper.ProductsMapper">
+<!--    完成商品的绑定-->
+<!--    在Mybatis xml配置文件中，集合和数组之类的 不需要自身的类型，而是写泛型的类型-->
+<!--    查询使用用select-->
+<!--    id的值为ProductsMapper中的方法名-->
+    <!-- 配置1对1 关联关系 -->
+
+<!--    一对多映射，实体类进行数据传递所以type的值为实体类的名称-->
+    <resultMap id="ProductsImagesResultMap" type="ProductWithImg">
+        <!-- 商品基本信息映射 -->
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="price" column="price"/>
+        <result property="size" column="size"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="description" column="description"/>
+        <result property="viewCount" column="view_count"/>
+
+        <!-- 一对多映射：商品图片集合 -->
+        <collection property="images" ofType="Images">
+            <id property="id" column="image_id"/>
+            <result property="productId" column="product_id"/>
+            <result property="url" column="url"/>
+        </collection>
+    </resultMap>
+
+    <!-- 查询所有商品及其图片信息 -->
+    <select id="getProductsList" resultMap="ProductsImagesResultMap">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        ORDER BY rand()
+
+    </select>
+
+    <!-- 根据商品ID查询商品及其图片信息 -->
+    <select id="getProductById" parameterType="int" resultMap="ProductsImagesResultMap">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        WHERE p.id = #{id}
+    </select>
+
+
+<!--    parameterType表示入参的类型-->
+<!--    resultMap表示返回类型-->
+    <select id="findTopProducts" resultMap="ProductsImagesResultMap" parameterType="int">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        ORDER BY rand()
+    </select>
+
+<!--   在所有商品中查询商品 -->
+    <select id="searchProducts" resultMap="ProductsImagesResultMap">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        <where>
+            <if test="name != null and name != ''">
+                AND p.title LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="minAmount != null and minAmount >= '' and maxAmount == null" >
+                AND p.price <![CDATA[ >= ]]> #{minAmount}
+            </if>
+            <if test="maxAmount != null and maxAmount >= '' and minAmount == null">
+                AND p.price <![CDATA[ <= ]]> #{maxAmount}
+            </if>
+            <if test="minAmount != null and minAmount >= '' and maxAmount != null and maxAmount >= ''">
+                AND p.price between #{minAmount} and #{maxAmount}
+            </if>
+        </where>
+    </select>
+
+
+<!--    根据商品类别Id进行商品的查询-->
+    <select id="productsCategoryById" resultMap="ProductsImagesResultMap" parameterType="Integer">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        WHERE p.category_id = #{categoryId}
+    </select>
+
+<!--    根据商品id查询商品详情-->
+    <select id="productDetail" resultMap="ProductsImagesResultMap" parameterType="Integer">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            p.view_count,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        WHERE p.id = #{id}
+    </select>
+<!--    添加更新浏览量的sql-->
+    <update id="updateViewCount" parameterType="Integer">
+        UPDATE products
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 添加商品到购物车 -->
+    <insert id="addToCart">
+        INSERT INTO cart (user_id, product_id, product_name, price, image_url, quantity)
+        SELECT #{userId}, p.id, p.title, p.price, i.url, #{quantity}
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        WHERE p.id = #{productId}
+            ON DUPLICATE KEY UPDATE quantity = quantity + #{quantity}
+    </insert>
+
+    <!-- 获取用户的购物车详情 -->
+    <select id="getCartDetails" resultMap="CartResultMap" parameterType="Integer">
+        SELECT
+            cart_id,
+            user_id,
+            product_id,
+            product_name,
+            price,
+            image_url,
+            quantity,
+            created_at,
+            updated_at
+        FROM cart
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 更新购物车商品数量 -->
+    <update id="updateCartQuantity">
+        UPDATE cart
+        SET quantity = #{quantity}, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </update>
+
+    <!-- 从购物车删除商品 -->
+    <delete id="removeFromCart">
+        DELETE FROM cart
+        WHERE user_id = #{userId} AND product_id = #{productId}
+    </delete>
+
+    <!-- 清空购物车 -->
+    <delete id="clearCart" parameterType="Integer">
+        DELETE FROM cart
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 获取购物车商品总数 -->
+    <select id="getCartItemCount" resultType="int" parameterType="Integer">
+        SELECT COALESCE(SUM(quantity), 0)
+        FROM cart
+        WHERE user_id = #{userId}
+    </select>
+
+
+    <!-- 购物车结果映射 -->
+    <resultMap id="CartResultMap" type="Cart">
+        <id property="cartId" column="cart_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="price" column="price"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="quantity" column="quantity"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 插入商品 -->
+    <insert id="insertProduct" parameterType="org.example.finalproject.demos.pojo.Products"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO products (title, price, size, category_id, user_id, description, create_time, view_count)
+        VALUES (#{title}, #{price}, #{size}, #{categoryId}, #{userId}, #{description}, NOW(), 0)
+    </insert>
+
+    <!-- 根据卖家ID查询商品列表 -->
+    <select id="getProductsBySellerId" resultMap="ProductsImagesResultMap" parameterType="Integer">
+        SELECT
+            p.id,
+            p.title,
+            p.price,
+            p.size,
+            p.category_id,
+            p.user_id,
+            p.create_time,
+            p.description,
+            p.view_count,
+            i.id as image_id,
+            i.product_id,
+            i.url
+        FROM products p
+                 LEFT JOIN images i ON p.id = i.product_id
+        WHERE p.user_id = #{sellerId}
+        ORDER BY p.create_time DESC
+    </select>
+
+    <!-- 更新商品信息 -->
+    <update id="updateProduct" parameterType="org.example.finalproject.demos.pojo.Products">
+        UPDATE products
+        SET title = #{title},
+            price = #{price},
+            size = #{size},
+            category_id = #{categoryId},
+            description = #{description}
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <!-- 删除商品 -->
+    <delete id="deleteProduct" parameterType="Integer">
+        DELETE FROM products WHERE id = #{productId}
+    </delete>
+
+
+</mapper>

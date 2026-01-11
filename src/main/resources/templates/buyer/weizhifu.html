@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>未支付</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/login/js/jquery.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="buyer/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="buyer/layout :: sidebar('unpaid')"></div>
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px;">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a th:href="@{/buyer/xitongshouye}" class="text-decoration-none">系统首页</a>
+            </li>
+            <li class="breadcrumb-item active">未支付订单</li>
+        </ol>
+    </nav>
+    <!-- 内容 -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">订单号</th>
+            <th scope="col">商品图片</th>
+            <th scope="col">商品名称</th>
+            <th scope="col">金额</th>
+            <th scope="col">下单时间</th>
+            <th scope="col">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${orders == null || orders.isEmpty()}">
+            <td colspan="6" class="text-center">暂无未支付订单</td>
+        </tr>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.orderNo}">订单号</td>
+            <td>
+                <img th:if="${order.items != null && !order.items.isEmpty()}" 
+                     th:src="${order.items[0].productImage}" 
+                     style="width: 50px; height: 50px; object-fit: cover;" 
+                     alt="商品图片">
+            </td>
+            <td>
+                <span th:if="${order.items != null && !order.items.isEmpty()}" 
+                      th:text="${order.items[0].productName}">商品名称</span>
+                <span th:if="${order.items != null && order.items.size() > 1}">
+                    <span>等</span><span th:text="${order.items.size()}"></span><span>件商品</span>
+                </span>
+            </td>
+            <td th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}">金额</td>
+            <td th:text="${order.createTime != null ? #dates.format(order.createTime, 'yyyy-MM-dd HH:mm') : ''}">下单时间</td>
+            <td>
+                <a th:href="@{'/buyer/order/detail/' + ${order.id}}" class="btn btn-sm btn-primary">查看详情</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

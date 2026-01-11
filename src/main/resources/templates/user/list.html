@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 校园便利平台</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+<!-- 顶部Header -->
+<div th:replace="admin/layout :: header"></div>
+
+<!-- 侧边栏 -->
+<div th:replace="admin/layout :: sidebar('user')"></div>
+
+<!-- 主内容区域 -->
+<div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #f5f5f5;">
+    <!-- 面包屑导航 -->
+    <nav class="bg-light p-3 mb-3 rounded">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">系统首页</a></li>
+            <li class="breadcrumb-item active">用户管理</li>
+        </ol>
+    </nav>
+
+    <!-- 消息提示 -->
+    <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${msg}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">用户列表</h5>
+                <a th:href="@{/users/add}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> 新增用户
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户列表 -->
+    <div class="card">
+        <div class="card-body">
+            <div th:if="${users == null or users.isEmpty()}" class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <p class="text-muted">暂无用户</p>
+            </div>
+
+            <div th:if="${users != null and !users.isEmpty()}" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>昵称</th>
+                        <th>邮箱</th>
+                        <th>手机号</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${users}">
+                        <td th:text="${u.id}">ID</td>
+                        <td th:text="${u.username}">用户名</td>
+                        <td th:text="${u.nickname}">昵称</td>
+                        <td th:text="${u.email}">邮箱</td>
+                        <td th:text="${u.phone}">手机号</td>
+                        <td>
+                            <span class="badge bg-success" th:if="${u.status == 1}">正常</span>
+                            <span class="badge bg-danger" th:if="${u.status == 0}">禁用</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/users/edit/{id}(id=${u.id})}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> 编辑
+                            </a>
+                            <a th:href="@{/users/delete/{id}(id=${u.id})}" 
+                               class="btn btn-sm btn-danger ms-2"
+                               onclick="return confirm('确认删除？')">
+                                <i class="fas fa-trash"></i> 删除
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 侧边栏脚本 -->
+<div th:replace="admin/layout :: sidebarScript"></div>
+</body>
+</html>

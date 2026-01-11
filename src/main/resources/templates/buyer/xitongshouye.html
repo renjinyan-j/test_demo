@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统首页 - 校园便利平台</title>
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+<body>
+    <!-- 顶部Header -->
+    <div th:replace="buyer/layout :: header"></div>
+
+    <!-- 侧边栏 -->
+    <div th:replace="buyer/layout :: sidebar('xitongshouye')"></div>
+
+    <!-- 主内容区域 -->
+    <div style="margin-left: 250px; margin-top: 60px; padding: 20px; min-height: calc(100vh - 60px); background-color: #ffffff;">
+        <!-- 面包屑导航 -->
+        <nav class="bg-light p-3 mb-3 rounded">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/buyer/xitongshouye}" class="text-decoration-none">系统首页</a>
+                </li>
+                <li class="breadcrumb-item active">系统首页</li>
+            </ol>
+        </nav>
+
+        <!-- 欢迎内容 -->
+        <div class="d-flex align-items-center justify-content-center" 
+             style="min-height: 400px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, #f0f0f0 10px, #f0f0f0 20px);">
+            <div class="fs-1 text-dark fw-medium text-center">欢迎使用 校园便利平台</div>
+        </div>
+    </div>
+    
+    <!-- 侧边栏脚本 -->
+    <div th:replace="buyer/layout :: sidebarScript"></div>
+</body>
+</html>

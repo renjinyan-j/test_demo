@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <title th:text="${title}">后台管理系统</title>
+
+    <!-- CSRF 令牌注入 -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <!-- Bootstrap 5 -->
+    <link th:href="@{/login/css/bootstrap.min.css}" rel="stylesheet">
+    <script th:src="@{/login/js/bootstrap.bundle.min.js}"></script>
+</head>
+
+<body>
+
+<!-- 顶部导航 -->
+<div th:fragment="topNav(type)">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand ms-3" href="/">后台管理</a>
+
+        <div class="ms-auto me-3">
+            <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">退出</a>
+        </div>
+    </nav>
+</div>
+
+<!-- 左侧菜单 -->
+<div th:fragment="menu">
+    <div class="col-2 p-3" style="background:#f0f0f0; height:100vh;">
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" th:href="@{/users}">用户管理</a></li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
